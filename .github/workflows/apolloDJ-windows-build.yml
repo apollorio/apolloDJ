@@ -1,0 +1,43 @@
+name: apolloDJ Windows Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        shell: powershell
+        run: |
+          cd src
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Smoke verify (quick)
+        shell: powershell
+        run: |
+          cd src
+          python smoke_verify.py --quick
+
+      - name: Build executable
+        shell: powershell
+        run: |
+          cd src
+          python -m PyInstaller --noconfirm apolloDJ.spec
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apolloDJ-windows
+          path: src/dist/*

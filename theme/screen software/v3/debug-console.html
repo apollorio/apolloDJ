@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>apolloDJ · console</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    html, body { height: 100%; background: #0c0c0e; color: #c8c8cc; font: 11px/1.45 Consolas, "Cascadia Mono", monospace; }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px; background: #0c0c0e; border-bottom: 1px solid #1a1a1e;
+    }
+    header span { color: #888; letter-spacing: .06em; text-transform: uppercase; font-size: 10px; }
+    header button {
+      background: #1a1a1e; color: #aaa; border: none; border-radius: 6px;
+      padding: 4px 10px; cursor: pointer; font: inherit;
+    }
+    header button:hover { background: #252528; color: #fff; }
+    #log {
+      height: calc(100% - 34px); overflow: auto; padding: 8px 10px 12px;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .line { margin: 0 0 2px; }
+    .info { color: #8e8e93; }
+    .ok { color: #34c759; }
+    .warn { color: #ff9500; }
+    .err { color: #ff453a; }
+  </style>
+</head>
+<body>
+  <header>
+    <span>apolloDJ · boot / login / bridge</span>
+    <button type="button" id="btn-clear">Limpar</button>
+  </header>
+  <div id="log" role="log" aria-live="polite"></div>
+  <script>
+    function apolloDebugAppend(msg, cls) {
+      var log = document.getElementById('log');
+      if (!log) return;
+      var d = document.createElement('div');
+      d.className = 'line ' + (cls || 'info');
+      d.textContent = '[' + new Date().toLocaleTimeString('pt-BR') + '] ' + msg;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+    }
+    window.apolloDebugAppend = apolloDebugAppend;
+    document.getElementById('btn-clear').onclick = function () {
+      document.getElementById('log').innerHTML = '';
+    };
+    apolloDebugAppend('Console pronta — aguardando eventos…', 'info');
+  </script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekordbox RGB Waveform Palette</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      color: #e8e8e8;
+      font-family: "Consolas", "Courier New", monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      max-width: 960px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .print-btn {
+      margin-top: 1.25rem;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 0.55rem 1.4rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .print-btn:hover {
+      background: #2a2a2a;
+      border-color: #666;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 220px);
+      gap: 1.25rem;
+      justify-content: center;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .swatch {
+      width: 220px;
+      height: 220px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .swatch::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      border-radius: inherit;
+    }
+
+    .swatch-label {
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .swatch-name {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ccc;
+      margin-bottom: 0.3rem;
+    }
+
+    .swatch-hex {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.15rem;
+    }
+
+    .swatch-rgb {
+      font-size: 0.72rem;
+      color: #aaa;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 2.5rem;
+    }
+
+    .canvas-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 0.6rem;
+      text-align: center;
+    }
+
+    #paletteStrip {
+      display: block;
+      width: 100%;
+      height: 72px;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+
+    @media print {
+      @page { size: A4 landscape; margin: 12mm; }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        background: #111;
+        padding: 0;
+        min-height: auto;
+      }
+
+      .print-btn { display: none; }
+
+      header { margin-bottom: 1rem; }
+
+      .grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        max-width: none;
+      }
+
+      .swatch {
+        width: 100%;
+        height: 140px;
+        break-inside: avoid;
+      }
+
+      .canvas-wrap {
+        margin-top: 1rem;
+        break-inside: avoid;
+      }
+
+      #paletteStrip { height: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Rekordbox RGB Waveform Palette</h1>
+    <p class="subtitle">Frequency Band Combination Reference</p>
+    <button class="print-btn" type="button" onclick="window.print()">Print Palette</button>
+  </header>
+
+  <div class="grid" id="swatchGrid" aria-label="Color swatches"></div>
+
+  <div class="canvas-wrap">
+    <p class="canvas-label">Horizontal strip preview</p>
+    <canvas id="paletteStrip" aria-label="Palette strip"></canvas>
+  </div>
+
+  <script>
+    const PALETTE = [
+      { name: 'NONE',     hex: '#222222' },
+      { name: 'LOW',      hex: '#f52323' },
+      { name: 'MID',      hex: '#18f34a' },
+      { name: 'HIGH',     hex: '#353cfe' },
+      { name: 'LOW+MID',  hex: '#d0db55' },
+      { name: 'MID+HIGH', hex: '#2afaff' },
+      { name: 'LOW+HIGH', hex: '#df62f7' },
+      { name: 'FULL',     hex: '#fed8f1' },
+    ];
+
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+
+    function luminance(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+
+    function buildSwatches() {
+      const grid = document.getElementById('swatchGrid');
+      grid.innerHTML = '';
+      PALETTE.forEach(entry => {
+        const { r, g, b } = hexToRgb(entry.hex);
+        const el = document.createElement('div');
+        el.className = 'swatch';
+        el.style.background = entry.hex;
+        el.innerHTML = `
+          <div class="swatch-label">
+            <div class="swatch-name">${entry.name}</div>
+            <div class="swatch-hex">${entry.hex.toUpperCase()}</div>
+            <div class="swatch-rgb">rgb(${r}, ${g}, ${b})</div>
+          </div>`;
+        grid.appendChild(el);
+      });
+    }
+
+    function drawStrip() {
+      const canvas = document.getElementById('paletteStrip');
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = canvas.parentElement.clientWidth;
+      const cssH = 72;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      canvas.style.width = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const n = PALETTE.length;
+      const blockW = cssW / n;
+
+      PALETTE.forEach((entry, i) => {
+        const x = i * blockW;
+        ctx.fillStyle = entry.hex;
+        ctx.fillRect(x, 0, blockW, cssH);
+
+        const dark = luminance(entry.hex) > 0.55;
+        ctx.fillStyle = dark ? '#111' : '#fff';
+        ctx.font = '600 11px Consolas, monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(entry.name, x + blockW / 2, cssH / 2);
+      });
+    }
+
+    buildSwatches();
+    drawStrip();
+    window.addEventListener('resize', drawStrip);
+  </script>
+</body>
+</html>

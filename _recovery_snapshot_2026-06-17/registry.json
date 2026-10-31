@@ -1,0 +1,678 @@
+{
+  "meta": {
+    "name": "apolloDJ PRO",
+    "version": "2.0.0",
+    "registry_version": "final-2026-06-17",
+    "generated_at": "2026-06-17T00:00:00-03:00",
+    "profile": "final-feature-complete",
+    "description": "Single source of truth for the complete apolloDJ Windows system after the full _references/map.md audit. Every reference repo is wired with a Top-3 Podium (primary + 1-2 fallbacks). 2026-06-17: + f3 pendrive tester (podium.pendrive_health, pendrive_tester), + Master XML SSOT heart (master_xml.py), + TODO 6.0 safe-flows audit (safe_flows_audit: auth device_mismatch, hardened version gate min_v/action/fail-closed/unlock_code)."
+  },
+  "priorities": {
+    "A_precision_accuracy": true,
+    "B_windows_performance": true,
+    "C_lightweight_memory": true
+  },
+  "current_structure": {
+    "src_root": "C:/Users/User/build/src_002",
+    "core_package": "apollodj/",
+    "entry_point": "main.py",
+    "build_spec": "apolloDJ.spec",
+    "build_script": "build.bat",
+    "dependencies_core": "requirements.txt",
+    "dependencies_extra": "requirements-extra.txt",
+    "icons": ["icon.ico", "icon.png"],
+    "ci_workflow": ".github/workflows/apolloDJ-windows-build.yml",
+    "documentation": "docs/",
+    "workspace_setup": "docs/WORKSPACE_SETUP.md",
+    "agent_skill": ".cursor/skills/project-setup-info-local/SKILL.md",
+    "agents_entrypoint": "AGENTS.md",
+    "flow_audit": "_audit_001_flows.py",
+    "release_gate": "_audit_ultra_pro.py",
+    "human_map": "mapped.md",
+    "machine_registry": "registry.json"
+  },
+  "legacy_archives": {
+    "moved_to": "C:/Users/User/build/_superseeded",
+    "purpose": "Read-only reference for dynamic module loading via importlib.util"
+  },
+  "apollo_p2p_integrated": {
+    "one_system": true,
+    "policy": "apolloDJ is 100% ONE system. P2P is an embedded headless backend inside apolloDJ.exe — never a separate Nicotine+ app, installer, or login UI.",
+    "user_visible": "Collab P2P (Buscar + Transferências)",
+    "internal_runtime": "portable headless engine + pynicotine + apollo_backend.conf",
+    "membership_gate": "apolloDJ|apolloDJ-EXTRA",
+    "allowed": ["search", "download", "share_collab_folder"],
+    "forbidden": [
+      "separate_nicotine_install",
+      "nicotine_gui",
+      "chat",
+      "pm",
+      "rooms",
+      "soulseek_login_ui",
+      "user_prompt_install_nicotine"
+    ],
+    "bundle": {
+      "inno_files_dest": "{app}/p2p",
+      "inno_source_staging": "src_002/deploy/p2p",
+      "pyinstaller_datas_dest": "p2p/",
+      "artifacts": ["nicotine.exe", "pynicotine (hiddenimports)"],
+      "required_filename": "nicotine.exe",
+      "dev_staging_path": "src_002/deploy/p2p/nicotine.exe",
+      "env_override": "APOLLODJ_P2P_BINARY",
+      "no_internet_download": true,
+      "status_api": "get_p2p_status() → {available, binary_path, nicotine_running, pynicotine, error?}",
+      "graceful_degrade": "InboxWatcher runs without binary; search/download gated"
+    },
+    "locked_config": "~/apolloDJ/Configurações/nicotine/apollo_backend.conf",
+    "launch_argv": ["nicotine.exe", "--headless", "--config", "apollo_backend.conf"]
+  },
+  "tab_visibility_policy": {
+    "visible_tabs_policy": "apolloDJ|apolloDJ-EXTRA -> buscar+transferencias; else inicio only",
+    "membership_gate": "apolloDJ|apolloDJ-EXTRA"
+  },
+  "boot_flow": {
+    "step_00_update_gate": {
+      "module": "apollodj.boot.update_check",
+      "endpoint": "https://dj.apollo.rio.br/updates.json",
+      "newer_available_action": "lock_screen",
+      "lock_html_title": "Versão Floppada"
+    },
+    "step_01_auth": {
+      "module": "apollodj.boot.auth_gate",
+      "provider": "apollo.rio.br",
+      "membership_rule": "apolloDJ|apolloDJ-EXTRA"
+    },
+    "step_02_apollo_p2p": {
+      "module": "apollodj.boot.nicotine_autostart",
+      "policy": "apolloDJ_integrated_headless_only",
+      "user_facing_name": "Collab P2P",
+      "never_separate_product": "No Nicotine+ installer, shortcut, or UI — embedded in apolloDJ.exe only",
+      "membership_gate": "apolloDJ|apolloDJ-EXTRA",
+      "capabilities": ["search", "download", "share_server_folder"],
+      "ui_tabs": ["buscar", "transferencias"],
+      "no_frontend": ["chat", "rooms", "pm", "p2p_login", "nicotine_gui"],
+      "download_routing": [
+        "Tracks/Baixando",
+        "Tracks/0. Em Análise",
+        "pipeline.run",
+        "Tracks/Coletânea|Tracks/2. Duvidosos"
+      ],
+      "filter": {
+        "type": "audio",
+        "min_bitrate_kbps": 320,
+        "extensions": ["mp3", "flac", "wav", "aiff"],
+        "length_seconds_range": [205, 720]
+      }
+    },
+    "step_03_shell_ready": {
+      "module": "apollodj.boot.ready_signal",
+      "event": "apollo:shell-ready"
+    }
+  },
+  "storage_layout": {
+    "base": "~/apolloDJ",
+    "locale": "pt-BR-premium",
+    "encoding": "utf-8 (no BOM)",
+    "compatibility_note": "All Python variable names preserved (TRACKS_COLETANEA_DIR, CACHE_DIR, INBOX_DIR, LOGS_DIR, CONFIG_DIR, DB_DIR) — only path values changed to pt-BR accented names.",
+    "Tracks": {
+      "0. Em Análise": "Staging — drop + apolloDJ P2P backend + pipeline_v2 (atomic commit source)",
+      "Coletânea": "MASTER LIBRARY — canonical filename + analysis + sidecar",
+      "2. Duvidosos": {
+        "1. Arquivo duvidoso": "Quality-gate rejects",
+        "2. Download falhado": "P2P download failures",
+        "3. Falha de amplificação": "LUFS / headroom / clipping rejects"
+      },
+      "1. Relatórios": "Per-track PDF/HTML/CSV analyses",
+      "Baixando": "apolloDJ P2P active downloads (backend downloaddir)",
+      "3. Transferências/": "Legacy in-progress downloads alias"
+    },
+    "Playlists": "Unified playlist XML + Rekordbox + Serato + universal CDJ",
+    "Pendrives": {
+      "pendrives-registrados.csv": "USB history log: timestamp + health + speed + quality",
+      "drives.json": "Live drive snapshot",
+      "Exportados": "Per-drive export bundles (Rekordbox XML + Serato + CDJ)"
+    },
+    "Caixa de Entrada": ["Nicotine", "PlaylistImports"],
+    "Dados": {
+      "impressoes-digitais.db": "Fingerprint-first dedup DB (chromaprint → ffmpeg PCM sha256)",
+      "espectrogramas": "Spectrogram + waveform PNGs (spectral.py + ui/waveform)",
+      "temp_wav": "Pipeline tmp working files",
+      "analises": "dj_prep_pro + spectral feature JSONs",
+      "_note": "Cache + DB + analyses absorbed into single fast path — Database/ removed."
+    },
+    "Registros": [
+      "processing.log",
+      "errors.log",
+      "audits.log",
+      "all_logs.csv"
+    ],
+    "Relatórios": "Global CSV/XLSX rollups (tracks + quality + translations)",
+    "Configurações": [
+      "config.ini",
+      "backups/",
+      "preferencias.xlsx"
+    ]
+  },
+  "modules": {
+    "conf": ["constants.py", "paths.py", "atomic.py", "preferences.py"],
+    "boot": ["update_check.py", "auth_gate.py", "nicotine_autostart.py", "ready_signal.py", "funny_status.py"],
+    "gating": ["features.py", "tabs.py"],
+    "p2p": ["backend_config.py", "service.py", "soulseek_client.py"],
+    "runtime": ["shell_state.py"],
+    "ingest": [
+      "pipeline.py",
+      "analyzer.py",
+      "analyze_audio.py",
+      "converter.py",
+      "audio_qc.py",
+      "qc.py",
+      "energy_score.py",
+      "tagger.py",
+      "renamer.py",
+      "loudness.py",
+      "dc_phase.py",
+      "headroom.py",
+      "silence_trim.py",
+      "harmonic.py",
+      "downbeat.py",
+      "bpm_key_detection.py",
+      "section_detection.py",
+      "spectral.py",
+      "onset_cues.py",
+      "structure.py",
+      "hotcue_smart.py",
+      "musicbrainz.py",
+      "cdj_auditor.py",
+      "db6_export.py",
+      "playlist_translate.py",
+      "mix_edit_parser.py",
+      "canonical_name.py",
+      "mover.py",
+      "approval.py",
+      "sidecar.py",
+      "watcher.py",
+      "usb_exporter.py",
+      "pendrive_utils.py",
+      "master_xml.py",
+      "dj_prep_pro.py",
+      "library.py",
+      "state_machine.py",
+      "quality_gate.py",
+      "fingerprint.py",
+      "xml_db.py",
+      "queue_worker.py",
+      "queue_boot.py",
+      "pipeline_v2.py"
+    ],
+    "parsers": ["track_model.py", "pyrekordbox_in.py", "serato_in.py", "serato2rekordbox.py"],
+    "exporters": ["rekordbox_xml.py", "serato_crates.py", "universal_cdj.py", "sidecar_export.py"],
+    "playback": ["preview.py"],
+    "ui": ["waveform.py", "theme_map.md"],
+    "bridge": ["ingest_bridge.py", "tabs_bridge.py", "update_bridge.py", "usb_bridge.py", "waveform_bridge.py"],
+    "installer_ui": ["launcher.py", "silent_runner.py"]
+  },
+  "pipeline_orchestrator": {
+    "module": "apollodj.ingest.pipeline",
+    "entrypoint": "run(track_path, commit=False, enrich_metadata=True)",
+    "stages": {
+      "01_format_detection": "converter.decode_to_wav",
+      "02_audio_qc": "audio_qc.run_qc",
+      "03_musical_analysis": [
+        "analyzer.analyze",
+        "harmonic.detect_key",
+        "structure.detect_sections",
+        "energy_score.score",
+        "hotcue_smart.smart_cues"
+      ],
+      "04_metadata_normalization": [
+        "musicbrainz.lookup",
+        "tagger.write_tags"
+      ],
+      "05_naming": [
+        "mix_edit_parser.extract",
+        "canonical_name.build"
+      ],
+      "06_approval_export": [
+        "cdj_auditor.audit",
+        "approval.route_track",
+        "sidecar.write"
+      ],
+      "07_universal_export": [
+        "parsers.track_model",
+        "exporters.rekordbox_xml",
+        "exporters.serato_crates",
+        "exporters.universal_cdj",
+        "exporters.sidecar_export"
+      ]
+    },
+    "v2_flow": {
+      "principle": "async + staged + fingerprint-driven + metadata-first — zero duplicate DSP, never freezes UI, crash-safe via atomic os.replace and XML-after-file commit ordering",
+      "entrypoint": "apollodj.ingest.pipeline_v2.run_v2(source_path, target_playlist=None)",
+      "queue": "apollodj.ingest.queue_worker.ImportQueue (bounded 1024, ProcessPoolExecutor cpu_count-1)",
+      "stages_ordered": [
+        "01_drop_enqueue",
+        "02_stage_uuid_in_em_analise",
+        "03_fast_validate_ffprobe",
+        "04_fingerprint_chromaprint_first",
+        "05_metadata_first_mutagen",
+        "06_heavy_analysis_processpool",
+        "07_quality_gate_weighted_score",
+        "08_canonical_rename",
+        "09_atomic_commit_os_replace",
+        "10_xml_commit_after_file",
+        "11_playlist_link",
+        "12_background_export_index"
+      ],
+      "stage_machine_events": [
+        "QUEUED", "STAGED", "VALIDATED", "FINGERPRINTED", "METADATA",
+        "ANALYZING", "QUALITY", "RENAMED", "COMMITTED", "INDEXED", "READY", "REJECTED"
+      ],
+      "performance_stack": {
+        "fast_probe": "ffprobe",
+        "metadata": "mutagen",
+        "fingerprint": "chromaprint (acoustid) → ffmpeg PCM sha256 → raw sha256",
+        "bpm": "apolloBPK (librosa+scipy, BeatNet-equivalent)",
+        "key": "bpm-detector NewKey + harmonic KS",
+        "queue": "asyncio + ProcessPoolExecutor(cpu_count-1)",
+        "xml": "in-RAM cache (debounced 3s atomic save)",
+        "atomic_io": "pathlib + os.replace (conf.atomic.atomic_write_text)"
+      },
+      "quality_score_weights": {
+        "duration": 10, "clipping": 25, "bitrate": 20,
+        "analysis_confidence": 25, "corruption": 20, "threshold": 80
+      }
+    },
+    "optional_preprocess": {
+      "module": "apollodj.ingest.pipeline.run_optional_preprocess",
+      "chain": ["silence_trim", "dc_phase", "headroom", "loudness"]
+    },
+    "one_click_dj_prep_pro": {
+      "module": "apollodj.ingest.dj_prep_pro",
+      "entrypoint": "prep(track_path, weak=False, commit=False)",
+      "chain": [
+        "01_silence_trim",
+        "02_headroom (M-Igashi/headroom binary)",
+        "03_loudness (dual-pass loudnorm, CDJ specs, dynaudnorm if weak)",
+        "04_BPM_Key (bpm-detector \u2192 apolloBPK \u2192 legacy hybrid)",
+        "05_hotcues (structure + downbeats + energy)",
+        "06_smart_rename (canonical: Artist - Title [Mix] - BPM - Key.ext)"
+      ],
+      "bridge_method": "IngestBridge.dj_prep_pro(path, weak, commit)"
+    }
+  },
+  "podium": {
+    "principle": "Each feature defines a Top-3 Podium: 1st = most precise + accurate; 2nd and 3rd = lightweight fallbacks. Primaries try first; on ImportError / RuntimeError the chain steps down. Result: zero hard dependencies on heavy libs (priority C honored).",
+    "features": {
+      "bpm_detection": {
+        "1st": "libraz/bpm-detector BPMDetector (Python, MIT)",
+        "2nd": "apolloBPK (apollodj.ingest.bpm_key_detection — BeatNet-equivalent CRNN→DBN, librosa-only; our reimplementation studied from BeatNet)",
+        "3rd": "legacy hybrid_bpm.py (madmom + beat_this + wavebeat consensus, bounded subprocess)",
+        "4th_safety": "librosa.beat.beat_track",
+        "5th_safety": "pydub deterministic constant"
+      },
+      "key_detection": {
+        "1st": "libraz/bpm-detector NewKeyDetector (Krumhansl-Schmuckler + Camelot)",
+        "2nd": "legacy harmonic_mixer.py (HPSS + CQT + Krumhansl-Schmuckler)",
+        "3rd": "librosa chroma_cqt + KS template match"
+      },
+      "spectral_features": {
+        "1st": "spectral.spectral_features (librosa bands + DFA danceability — studied from essentia, our version)",
+        "2nd": "pyAudioAnalysis mid_feature_extraction",
+        "3rd": "librosa RMS + centroid minimal"
+      },
+      "energy_score": {
+        "1st": "legacy energy_analyzer.py (RMS + spectral centroid + transient density)",
+        "2nd": "bpm-detector groove energy",
+        "3rd": "pydub RMS-only",
+        "note": "spectral.spectral_features supplies multi_band_energy + danceability for Stack C / hotcues"
+      },
+      "audio_qc": {
+        "1st": "ffmpeg ebur128 + astats + spectral centroid + adaptive 99.5% threshold",
+        "2nd": "pyloudnorm ITU-R BS.1770 + spectral refinement",
+        "3rd": "pydub silence + peak helpers"
+      },
+      "format_conversion": {
+        "1st": "ffmpeg subprocess (44.1k s16le)",
+        "2nd": "pydub.AudioSegment",
+        "3rd": "librosa.load + soundfile.write"
+      },
+      "loudness_normalization": {
+        "1st": "ffmpeg DUAL-PASS loudnorm (measure JSON \u2192 apply linear=true I=-14 TP=-1 LRA=measured; force 44.1k/2ch/s16; optional dynaudnorm=gausssize=3 for weak tracks)",
+        "2nd": "slhck/ffmpeg-normalize Python API (two-pass EBU R128 batch)",
+        "3rd": "ffmpeg CLI single-pass loudnorm",
+        "4th_safety": "pyloudnorm measure-only (no write)"
+      },
+      "dc_phase": {
+        "1st": "legacy pipeline/dc_phase.py",
+        "2nd": "ffmpeg highpass=20 + pan",
+        "3rd": "pydub.effects.high_pass_filter"
+      },
+      "headroom": {
+        "1st": "M-Igashi/headroom Rust binary (mp3rgain built-in, no limiter, Rekordbox Auto Gain exact)",
+        "2nd": "legacy pipeline/headroom.py (true-peak aware)",
+        "3rd": "ffmpeg alimiter (in-place re-encode to ceiling)",
+        "4th_safety": "pydub apply_gain to ceiling"
+      },
+      "silence_trim": {
+        "1st": "legacy core/silence_trimmer.py (auditok + asyncio)",
+        "2nd": "pydub detect_leading_silence",
+        "3rd": "ffmpeg silenceremove"
+      },
+      "downbeat_detection": {
+        "1st": "downbeat.downbeat_detection (librosa activations + bar Viterbi — studied from BeatNet/madmom, our version)",
+        "2nd": "librosa.beat.beat_track + bass-onset phase pick",
+        "3rd": "uniform 4/4 grid from estimated BPM"
+      },
+      "song_structure": {
+        "1st": "bpm-detector structure.py",
+        "2nd": "apolloSEC (apollodj.ingest.section_detection — Foote SSM + checkerboard novelty + k-means, librosa+scipy only; studied from madmom/BeatNet logic, our version)",
+        "3rd": "librosa.segment.agglomerative on MFCC"
+      },
+      "onset_smart_cues": {
+        "1st": "onset_cues.onset_smart_cues (librosa.onset + scipy peaks + beat merge — studied from aubio, our version)",
+        "2nd": "librosa.onset.onset_detect + min-spacing",
+        "3rd": "uniform 8-point BPM grid"
+      },
+      "smart_hotcues": {
+        "1st": "structure sections + downbeats + energy peaks (Stack C)",
+        "2nd": "onset_cues.onset_smart_cues (aubio onset+tempo analogue)",
+        "3rd": "legacy quantizer.py consensus +8 boost",
+        "4th_safety": "fixed 16-bar grid"
+      },
+      "metadata_lookup": {
+        "1st": "musicbrainzngs search_recordings",
+        "2nd": "acoustid fingerprint match",
+        "3rd": "filename regex parser"
+      },
+      "tag_writing": {
+        "1st": "mutagen ID3 (TBPM/TKEY/TXXX) + FLAC native + MP4 atoms",
+        "2nd": "analyze-tag-songs batch loop pattern (mutagen-based)",
+        "3rd": "ffmpeg -metadata + remux copy"
+      },
+      "cdj_preflight": {
+        "1st": "legacy pipeline/cdj_auditor.py",
+        "2nd": "mutagen info (sample_rate + length)",
+        "3rd": "ffprobe -show_streams"
+      },
+      "db6_anlz_export": {
+        "1st": "pyrekordbox Rekordbox6Database + AnlzFile",
+        "2nd": "pyrekordbox RekordboxXml",
+        "3rd": "apolloDJ unified XML stub (usb_exporter)"
+      },
+      "playlist_translation": {
+        "1st": "universal-dj-usb USBParser + PlaylistConverter",
+        "2nd": "pyrekordbox RekordboxXml \u2192 M3U",
+        "3rd": "plain text M3U writer"
+      },
+      "audio_preview": {
+        "1st": "python-vlc",
+        "2nd": "pydub.playback.play",
+        "3rd": "ffplay subprocess"
+      },
+      "waveform_render": {
+        "1st": "libdjwaveform compiled C lib (subprocess)",
+        "2nd": "Pillow + soundfile gradient (love12 algorithm port)",
+        "3rd": "librosa.display + matplotlib"
+      },
+      "p2p_discovery": {
+        "1st": "apolloDJ embedded headless (bundled p2p/nicotine.exe + pynicotine + apollo_backend.conf)",
+        "2nd": "pynicotine in-process (search + download + share folder only)",
+        "3rd": "manual file drop (Caixa de Entrada/Nicotine)"
+      },
+      "auth": {
+        "1st": "ApolloClient via _superseeded (X-Apollo-App-Token + Device-Id)",
+        "2nd": "wp-api-client ApplicationPasswordAuth",
+        "3rd": "cached config.ini (24h offline grace)"
+      },
+      "embedded_ui": {
+        "1st": "pywebview WebView2 + JS\u2194Python bridge",
+        "2nd": "pywebview CEF renderer",
+        "3rd": "pywebview default backend"
+      },
+      "drag_and_drop": {
+        "1st": "pywebview drag-drop bridge (HTML5)",
+        "2nd": "tkinterdnd2 (Tk fallback shell)",
+        "3rd": "folder watcher on Inbox/"
+      },
+      "usb_export": {
+        "1st": "exporters.rekordbox_xml (PIONEER CDJ native — pyrekordbox writer + hand-rolled XML fallback)",
+        "2nd": "exporters.serato_crates (serato-tools native + M3U fallback)",
+        "3rd": "exporters.universal_cdj (PIONEER/USBANLZ + DJ Music/ raw layout — ANLZ if available, XML always)"
+      },
+      "fingerprint": {
+        "1st": "chromaprint via pyacoustid (encoding-independent acoustic fingerprint)",
+        "2nd": "ffmpeg decoded-PCM sha256 (re-encoding stable)",
+        "3rd": "raw file sha256 (exact-bytes)"
+      },
+      "import_queue": {
+        "1st": "queue_worker.ImportQueue (asyncio + ProcessPoolExecutor cpu_count-1, bounded 1024)",
+        "2nd": "synchronous fallback (pipeline_v2.run_v2 direct call)",
+        "3rd": "watcher.process_file (legacy single-thread)"
+      },
+      "pendrive_health": {
+        "1st": "f3 (Fight Flash Fraud) — f3probe (quick) / f3write+f3read (full): fake-capacity + real speed + bad blocks, live streaming (pendrive_utils.run_f3_test_streaming)",
+        "2nd": "usb_exporter.usb_health_check (16 MB write/read speed benchmark, cached 60 s)",
+        "3rd": "shutil.disk_usage size/free only"
+      }
+    }
+  },
+  "pendrive_tester": {
+    "module": "apollodj.ingest.pendrive_utils",
+    "philosophy": "Minimal new files, maximum power — reuses Pendrives/, quality_gate, usb_exporter, registry.",
+    "engine": "f3 (Fight Flash Fraud)",
+    "binary_discovery": "APOLLODJ_F3_BIN (dir or file) -> shutil.which(f3probe|f3write|f3read) -> known winget/install dirs",
+    "modes": {
+      "quick": "f3probe — fast fake-capacity health check, writes no data (default)",
+      "full": "f3write + f3read — real write/read speed + bad-block/data-loss integrity"
+    },
+    "streaming": "subprocess.Popen line-by-line -> on_progress(speed/percent/fake) + on_line callbacks; timeout + graceful kill",
+    "health_score": "weighted 0-100: capacity 40 (0 if fake) + write 25/10 (>15 MB/s) + read 20/10 (>20 MB/s) + integrity 15/0 (bad_blocks==0)",
+    "recommendation": ["Excellent", "Usable", "Risky", "Do not use"],
+    "data": {
+      "csv": "Pendrives/pendrives-registrados.csv (timestamp + health + speed + quality)",
+      "json": "Pendrives/drives.json ({drive: {last, history<=5, updated_at}})"
+    },
+    "quality_gate": "quality_gate.check_usb_health(usb_result, audio_score?) -> {export_allowed, usb_health_score, badge, reasons, combined_score?}",
+    "export_guard": "usb_exporter._f3_export_guard blocks export on fake/low-health last test; APOLLODJ_REQUIRE_F3_TEST=1 forces a test first",
+    "bridge": "UsbBridge.test_pendrive(drive_letter, quick) · get_pendrive_status(drive_letter) · list_pendrives() (pywebview.api.usb.*)",
+    "tests": ["_test_pendrive_utils.py (24)", "_test_pendrive_integration.py (11)"]
+  },
+  "safe_flows_audit": {
+    "todo": "6.0",
+    "auditor": "_audit_006_flows.py",
+    "purpose": "Verifies src_002 follows the MINIMUM FLOWS from the attached reference codes (auth contract, version gate, master XML SSOT, nicotine creds).",
+    "result": "26/26 flows satisfied (0 missing)",
+    "reference_codes": [
+      "apollo_dj_safe_flows.py (Apollo desktop auth contract)",
+      "apollo_dj_safe_flows (1).py (Nicotine+/Soulseek partnership creds)",
+      "apollo_dj_safe_flows (2).py (version gate: min_v + action=lock, fail-closed, paid unlock)",
+      "apollo_xml_pro_lock.py (Master XML SSOT heart — cross-process lock + dedup)"
+    ],
+    "auth": "constants.API_BASE=/wp-json/apollo/v1 · APP_ID=apollodj · X-Apollo-App-Token + X-Apollo-Device-Id · auth_gate verify-first + dj/permissions ?app_id patch · NEW: device_mismatch -> AuthResult.reason + logout (re-login on this machine)",
+    "version_gate": "update_check.get_update_gate(current, manifest?, fail_closed=True, unlocked?) honors min_v + action=='lock', fail-CLOSED offline, paid unlock_code (keyring), self_clean/self_delete/broken hooks. get_boot_gate now honors min_v/action first (offline-grace fail_open). Original latest_version/mandatory path preserved.",
+    "master_xml": {
+      "module": "apollodj.ingest.master_xml",
+      "principle": "ONE master XML (heart) pumps web/desktop/Pioneer/playlists. Track defined once in <COLLECTION> with stable TrackID=sha256(path)[:16]; <PLAYLISTS> hold TrackID refs only — zero audio/metadata duplication.",
+      "api": "stable_track_id() · locked_apollo_xml() (cross-process exclusive lock + atomic os.replace) · ApolloXMLStore.{ensure_track_in_collection, add_track_to_playlist(dedup->bool), remove_track_from_playlist, get_playlist_track_ids, export_to_rekordbox}",
+      "deps": "stdlib-only (ElementTree); optional filelock auto-used if installed, else O_CREAT|O_EXCL spin-lock (priority C — no hard dep)",
+      "relation": "Rekordbox DJ_PLAYLISTS-style export heart; complements the fingerprint-keyed internal SSOT in xml_db.py (coletanea.aprio.xml)"
+    },
+    "nicotine_creds": "EQUIVALENT-OR-BETTER: existing generate_nicotine_credential uses deterministic SHA-256 (zero Soulseek duplicate accounts) — kept over the reference username*2 scheme which would collide and break the _audit_001 deterministic check.",
+    "tests": ["_test_master_xml.py (8)", "_test_update_gate.py (10)", "_test_auth_gate_reason.py (6)"]
+  },
+  "usb_export": {
+    "trigger": "User selects a playlist and chooses an exported USB drive",
+    "module": "apollodj.ingest.usb_exporter + db6_export + playlist_translate",
+    "source_audio": "Tracks/Coletânea (single source of truth)",
+    "outputs": ["apolloDJ unified XML", "Rekordbox6 DB + ANLZ", "Traktor NML", "Serato crate JSON", "M3U/M3U8"]
+  },
+  "stacks": {
+    "A_full_cdj_prep": ["silence_trim", "loudness", "analyzer", "harmonic", "tagger", "db6_export"],
+    "B_ultra_accuracy": ["analyzer (apolloBPK/bpm-detector)", "structure (bpm-detector)", "downbeat (librosa)", "db6_export (ANLZ)", "ui/waveform (libdjwaveform)"],
+    "C_smart_hotcues": ["structure", "downbeat", "analyzer (downbeat_cues)", "energy_score", "hotcue_smart", "db6_export"],
+    "D_full_metadata_repair": ["tagger (scan)", "musicbrainz", "tagger (write)", "analyzer", "audio_qc"],
+    "E_nicotine_discovery": ["nicotine_autostart", "audio_qc", "analyzer (quick)", "tagger", "approval"],
+    "I_nicotine_p2p_ingest": ["nicotine_autostart", "p2p.backend_config", "InboxWatcher", "pipeline", "xml_db"],
+    "F_pywebview_main_ui": ["installer_ui/launcher", "bridge/*", "playback/preview", "ui/waveform"],
+    "G_universal_dj": ["parsers.track_model", "exporters.rekordbox_xml", "exporters.serato_crates", "exporters.universal_cdj", "exporters.sidecar_export", "playlist_translate"],
+    "H_v2_async_ingest": ["queue_worker.ImportQueue", "pipeline_v2.run_v2", "fingerprint.fingerprint_track", "xml_db.lookup", "quality_gate.score", "state_machine.emit"]
+  },
+  "library_ui": {
+    "page": "Coletânea / Biblioteca",
+    "html_module": "src_002/theme/screen software/v2/coletanea-lib.js",
+    "css": "src_002/theme/screen software/v3/universal.apollodj.css (Q — LIBRARY COLETÂNEA)",
+    "principle": "Two structurally identical aside cards — COMPUTADOR (raw machine folders) and PLAYLISTS (Rekordbox-style lists bound to ONE central audio folder, zero duplicate audio).",
+    "computador": {
+      "meaning": "Real local computer folders the DJ browses — NOT the managed library.",
+      "default_folders_always_shown": [
+        { "id": "downloads", "label": "Downloads", "path": "~/Downloads", "hideable": true },
+        { "id": "music", "label": "Músicas", "path": "~/Music", "hideable": true }
+      ],
+      "add_fixed_folder": "[+] (#lib-add-folder-btn) → ingest.pick_folder() native picker (prompt fallback) — persists extra fixed local folders.",
+      "hide_option": "Every listed folder (defaults + added) has a per-row eye toggle; header eye (#lib-toggle-hidden) reveals/hides the hidden set. Persisted in localStorage 'apollodj.computador.v1' + mirrored to ingest.save_computer_folders().",
+      "prefs_key": "apollodj.computador.v1",
+      "on_add_to_playlist": "Drag / click / right-click a COMPUTADOR folder or file onto ANY playlist → ingest.add_path_to_playlist(path, playlistView) runs the full flow (pipeline_v2 + dj_prep_pro): analyse → rename → save audio into ~/apolloDJ/Tracks/Coletânea (central unique folder).",
+      "analysis_outputs": ["bpm", "key", "energy", "energy_curve", "waveform", "LUFS", "gain_eq (Rekordbox Auto Gain / Berlin club prep)", "true_peak", "headroom", "structure", "hotcues", "fingerprint"],
+      "quality_gate": "quality_gate.score weighted >=80 → club-playable; below → flag. cdj_auditor + audio_qc decide club readiness.",
+      "warning_symbol": {
+        "trigger": "Any analysis/QC problem that could harm a live club set (clipping, low bitrate, corruption, loudness/headroom failure, CDJ incompatibility).",
+        "ui": "Yellow .lib-cpt-warn (ri-error-warning-fill, #f5b400) on the row; native title tooltip explains shortly on :hover.",
+        "source": "ingest.list_computer_folders() folder.warn = { msg } or per-track sidecar quality flags."
+      }
+    },
+    "playlists": {
+      "meaning": "NOT folders — converted lists imported from Rekordbox-standard XML/xlsm/xlm, mirroring CDJ/XDJ playlist structure.",
+      "import": ["Caixa de Entrada/PlaylistImports", "parsers.pyrekordbox_in", "ingest.playlist_translate", "ingest.mix_edit_parser"],
+      "central_audio_folder": "~/apolloDJ/Tracks/Coletânea — single source of truth; playlists reference tracks by path + fingerprint key (parsers.track_model), NEVER copy audio → zero duplicated audio files.",
+      "dedup": "Dados/impressoes-digitais.db (chromaprint → ffmpeg PCM sha256 → raw sha256); fingerprint HIT attaches playlistRef only and SKIPS analysis.",
+      "hide_option": "Same per-row eye toggle as COMPUTADOR for playlists / groups."
+    },
+    "bridge_surface": {
+      "namespace": "pywebview.api.ingest",
+      "methods": [
+        "list_computer_folders() -> { folders: [{ id, label, icon, path, hidden, warn:{msg} }] }",
+        "save_computer_folders(prefs)",
+        "pick_folder() -> { path, label }",
+        "add_path_to_playlist(path, playlist_view) -> ingest job (pipeline_v2 + dj_prep_pro, commit to Coletânea)",
+        "save_standardized_tags(path, meta)",
+        "extract_advanced_metadata(path)"
+      ],
+      "degrade": "No pywebview bridge (browser preview) → defaults render, [+] uses prompt, drops show a connect toast — page never breaks."
+    }
+  },
+  "final_status": {
+    "structure_ready": true,
+    "audits_green": "smoke_verify_10of10_audit001_0err_0warn_functional_28of28_e2e_6of6_todo6.0_26of26",
+    "tdd_suites_green": "pendrive_utils_24 + pendrive_integration_11 + master_xml_14 + master_xml_integration_6 + export_source_5 + update_gate_10 + auth_gate_reason_6 = 76",
+    "active_root": "src_002",
+    "feature_coverage": "100%_of_reference_map_v2026-05-02",
+    "latest_additions_2026_06_17": [
+      "f3 pendrive tester (apollodj.ingest.pendrive_utils) — fake-capacity + speed + bad-blocks, streaming, quality_gate.check_usb_health, UsbBridge.test_pendrive/get_pendrive_status/list_pendrives",
+      "Master XML SSOT heart HARDENED (apollodj.ingest.master_xml, phases 0-4 ✅) — Phase 0: lxml-optional + iterparse hook · Phase 1: add_path_to_playlist() live bridge · Phase 2: filelock + O_EXCL dual-lock documented · Phase 3: Rekordbox 6 export (file://localhost/, KEY refs, NODE folders) + Serato/Traktor hooks · 14/14 TDD, Gate 2/3 green",
+      "Master XML LIVE PIPELINE INTEGRATION (Phase 2.1 ✅) — pipeline_v2 stage-10 + dedup-HIT now mirror committed tracks into master XML (master_xml.record_committed_track, BEST-EFFORT never breaks ingest); default_store() at conf.paths.APOLLO_LIBRARY_XML; library_tracks_for_export() reader = tested export source for usb_exporter/rekordbox_xml. 6/6 TDD (_test_master_xml_integration.py)",
+      "TODO 6.0 safe-flows audit (_audit_006_flows.py 26/26) — auth device_mismatch reason, hardened update gate (min_v/action/fail-closed/unlock_code/self_clean/self_delete)"
+    ],
+    "p2p_pro_requirement": "deploy/p2p/nicotine.exe OR pynicotine for live search",
+    "release_roadmap_2026_06_17": {
+      "phase1_blockers": "1.1 BLOCKED (human: drop deploy/p2p/nicotine.exe — apolloDJ never downloads it; pynicotine dev fallback works) · 1.2 ✅ APOLLODJ_P2P_BINARY + headless launch verified · 1.3 ✅ gates green",
+      "phase2_master_xml": "2.1 ✅ pipeline mirror + export reader (TDD) · 2.2 ✅ usb_exporter.export_to_usb sources tracks from master XML (_resolve_export_tracks, best-effort+logged, track_source in result; ApolloXMLStore.export_to_rekordbox already covers direct master→RB) — 5/5 TDD · 2.3 sidecar JSON index (perf, deferred/optional)",
+      "phase3_v3_ui": "PENDING — pendrive Test button/modal/badge + Coletânea DnD + master XML status indicator (frontend JS)",
+      "phase4_packaging": "spec already lists master_xml; registry/mapped updated; Inno + build.bat final pass pending",
+      "phase5_docs": "§16/§17 marked; What's New section pending"
+    },
+    "next_step": "Phase 3 v3 UI (pendrive Test/badge/modal + Coletânea DnD + master-XML status) · or Phase 2.3 sidecar index (perf) · then packaging. Release blocker: human must drop deploy/p2p/nicotine.exe."
+  },
+  "theme": {
+    "root": "src_002/theme",
+    "locale": "pt-BR-young",
+    "locale_rules": {
+      "language": "pt-BR",
+      "tone": "informal_jovem",
+      "dj_terms_english": ["cue", "load", "cup", "autocue", "hotcue", "sync", "track", "tracks"]
+    },
+    "screens": {
+      "install": {
+        "html": "src_002/theme/screen install/apolloDJ-install-previewer.html",
+        "js": "src_002/theme/screen install/install-previewer.js",
+        "token_version": "v2-aligned",
+        "dark_mode": true,
+        "launch_target": "../screen software/apolloDJ.v3.html"
+      },
+      "running": {
+        "html": "src_002/theme/screen software/apolloDJ.v3.html",
+        "html_fallback": "src_002/theme/screen software/apolloDJ.v2.html",
+        "modules_v1": "src_002/theme/screen software/v1/",
+        "modules_v2": "src_002/theme/screen software/v2/",
+        "modules_v3": "src_002/theme/screen software/v3/",
+        "token_version": "v3-canonical",
+        "dark_mode": true,
+        "basemap_comment": true,
+        "pyinstaller_bundle_dest": "theme/"
+      }
+    },
+    "design_tokens": {
+      "accent": "#E8820C",
+      "accent_var": "--ac",
+      "radius": "20px",
+      "radius_var": "--r",
+      "ease": "cubic-bezier(.16, 1, .3, 1)",
+      "font_main": "var(--ff-main, system-ui, sans-serif)",
+      "font_mono": "var(--ff-mono, monospace)"
+    },
+    "audit_status": {
+      "schema": "v3_feature_theme_audit_2026-05-19",
+      "matrix_doc": "mapped.md §14",
+      "shell_boot": "apollodj/installer_ui/launcher.py injects __APOLLO_BOOT_PAYLOAD__ and calls ApolloRuntime.applyShellPayload",
+      "gates": "apolloDJ.v3.html App.applyFeatureGates + apollodj/gating/tabs.py visible_tabs",
+      "prep_bridge": "theme/screen software/v1/prep.js → pywebview.api.ingest.dj_prep_pro_folder",
+      "usb_bridge": "v1/pendrive-dj.js + v1/usb-pro.js → pywebview.api.usb.list_drives",
+      "cta_policy": "CTA_MAP coletanea/buscar focuses #colab-track-search",
+      "buscar": "canonical_p2p_search_slug_2026-05-28",
+      "nicotine_backend": "headless_only_no_chat_pm_gui"
+    },
+    "ui_routes": {
+      "collab_p2p": {
+        "shell": "apolloDJ.v3.html",
+        "subtab": "buscar",
+        "page_module": "v2/colab-share.js",
+        "search": "pywebview.api.nicotine_search",
+        "download": "pywebview.api.nicotine_download",
+        "transferencias": "v1/transferencias.js",
+        "ingest_stack": "I_nicotine_p2p_ingest",
+        "backend_only": true,
+        "visible_tabs_eligible": ["buscar", "transferencias"]
+      }
+    },
+    "waveform_pro": {
+      "page": "Utilidades / Waveform (djToolsPro)",
+      "js_module": "src_002/theme/screen software/v3/waveform.v2.js (single self-contained IIFE — loaded by one <script>)",
+      "css": "src_002/theme/screen software/v3/universal.apollodj.css (single source — note-tag/note-cats/seg--mark/mark-badge/loop-reg/abtn.danger)",
+      "simulation": "L2 — SIMULATED, production-grade editing surface (no real audio analysis); syncs to Python via ApolloState 'deck:loaded' analysis.hotcues/loops when present.",
+      "marcar_tools": {
+        "where": "stage toolbar #djp-markTools (seg--mark) — armed tool shows accent + crosshair + #djp-markBadge hint",
+        "modes": ["cue", "memcue", "loop", "note"],
+        "flow": "arm a tool → click the waveform → marker created at the snapped bar (notes at exact time); reuses selectEntity() to jump + open its editor card."
+      },
+      "editing": {
+        "hot_cues": "add (mark tool OR 'Marcar hot cue no tempo atual', next free number 1-8 + Pioneer color, bar-snapped), edit name/comment/color, delete; 8-pad grid + nav badge update live.",
+        "memory_loops": "REGISTRAR LOOP buttons 1/2/4/8/16 bar create a loop at the playhead; rename, change length, toggle active, delete.",
+        "memory_cues": "add at current position, rename, delete.",
+        "notes": "rich model { time, text, cat }; categories NOTA/MIX/FX/VOCAL/WARN map to grayscale + accent (orange only for NOTA/WARN); timestamp badge click-to-seek, category chip cycles, inline edit, delete; category-aware glass-pill markers on waveform + overview."
+      },
+      "design_rules_respected": ["single CSS file", "no outer box-shadow (inset only)", "orange (#E8820C) only on accent/active/annotation", "no inline styles except CSS custom props (--sw/--sw2/--pc/--cc)"]
+    },
+    "integration_map": "src_002/apollodj/ui/theme_map.md",
+    "preview": {
+      "cdn_junction": "src_002/theme/cdn.apollo.rio.br → plugins/_dev web/cdn.apollo.rio.br",
+      "core_script": "../cdn.apollo.rio.br/v1.0.0/core.js?v=t0x&dev=local",
+      "http_server": "cd src_002/theme && python -m http.server 8765",
+      "urls": {
+        "app_v3": "http://127.0.0.1:8765/screen%20software/apolloDJ.v3.html",
+        "app_v2": "http://127.0.0.1:8765/screen%20software/apolloDJ.v2.html",
+        "install": "http://127.0.0.1:8765/screen%20install/apolloDJ-install-previewer.html"
+      },
+      "verify_local": "plugins/_dev web/cdn.apollo.rio.br/scripts/verify-cdn-assets.ps1",
+      "verify_remote": "plugins/_dev web/cdn.apollo.rio.br/scripts/verify-cdn-remote.ps1"
+    }
+  }
+}

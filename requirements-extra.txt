@@ -1,0 +1,34 @@
+# apolloDJ PRO — Ultra Accuracy / Pro Studio tier
+# Install on top of requirements.txt when you want all Top-3-Podium
+# primaries to be available (otherwise fallbacks handle the work).
+#
+# IMPORTANT: BeatNet / torch are NO LONGER required.
+# Tier 2 BPM/Key is now `apolloBPK` (apollodj/ingest/bpm_key_detection.py),
+# a librosa-only BeatNet-equivalent reimplementation (CRNN→DBN logic).
+# This saves ~800 MB in the frozen exe and removes the MSVC Build Tools
+# requirement that madmom needs to compile.
+
+# Core analysis (apolloBPK + librosa fallback)
+librosa>=0.10.2
+numpy>=1.26
+scipy>=1.13
+
+# Loudness + audio QC
+pyloudnorm>=0.1.1
+ffmpeg-normalize>=1.28.0
+
+# Tag / Rekordbox / metadata
+pyrekordbox>=0.4.0
+musicbrainzngs>=0.7.1
+
+# Preview + waveform
+python-vlc>=3.0.20123
+Pillow>=10.3.0
+
+# Soulseek / Nicotine+ (Buscar + Collab.share — required for frozen exe P2P)
+nicotine-plus>=3.3.0
+
+# Optional (tier-3 legacy subprocess only — used when bpm-detector + apolloBPK both fail).
+# Requires Microsoft Visual C++ Build Tools 14+ on Windows. Skip if you don't need it.
+# madmom>=0.16.1
+# pyAudioAnalysis>=0.3.14

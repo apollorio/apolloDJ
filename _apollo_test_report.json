@@ -1,0 +1,30 @@
+{
+  "done": 2,
+  "total": 4,
+  "results": [
+    {
+      "index": 1,
+      "source": "C:\\Users\\User\\AppData\\Roaming\\nicotine\\downloads\\apollo-test\\16 Suffer the Children (remix).flac",
+      "name": "16 Suffer the Children (remix).flac",
+      "ok": true,
+      "routed": "C:\\Users\\User\\apolloDJ\\Tracks\\Coletânea\\Unknown - 16 Suffer the Children (remix) - 128 - G.wav",
+      "final_name": "Unknown - 16 Suffer the Children (remix) - 128 - G.wav",
+      "in_coletanea": true,
+      "seconds": 345.0,
+      "bpm": 128.0,
+      "key": "G"
+    },
+    {
+      "index": 2,
+      "source": "C:\\Users\\User\\AppData\\Roaming\\nicotine\\downloads\\apollo-test\\202-ce_ce_rogers-someday_(unreleased_remix).aiff",
+      "name": "202-ce_ce_rogers-someday_(unreleased_remix).aiff",
+      "ok": true,
+      "routed": "C:\\Users\\User\\apolloDJ\\Tracks\\Coletânea\\Carrie Biell - Ce-ce - 119 - D.wav",
+      "final_name": "Carrie Biell - Ce-ce - 119 - D.wav",
+      "in_coletanea": true,
+      "seconds": 416.6,
+      "bpm": 119.0,
+      "key": "D"
+    }
+  ]
+}

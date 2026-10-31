@@ -1,0 +1,27 @@
+# Apollo DJ — locked Nicotine+ headless backend (Linux systemd)
+# Install:
+#   sudo cp deploy/apollodj-nicotine.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now apollodj-nicotine
+#
+# Requires apollo_backend.conf at /secure/apollo_backend.conf (or override below).
+
+[Unit]
+Description=Apollo Nicotine+ headless Soulseek backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=apollodj
+Group=apollodj
+ExecStart=/usr/bin/nicotine --headless --config /secure/apollo_backend.conf
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/secure /var/lib/apollodj
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+- [x] Read apolloDJ.v3.html and waveform.v2.js
+- [ ] Remove inline transform/width overrides on lane/wave elements (shellHTML)
+- [ ] Change .djp-work from grid to relative+block layout
+- [ ] Make .djp-sidebar absolute positioned left with bg+blur
+- [ ] Make .djp-inspector absolute positioned right with bg+blur
+- [ ] Make .djp-center full width
+- [ ] Make .card use rgba(var(--rgb-theme), .9) + backdrop-filter blur(50px)
+- [ ] Refine wave-stage belt to true 100vw black belt
+- [ ] Verify all changes work together

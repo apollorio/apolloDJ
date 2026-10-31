@@ -1,0 +1,29 @@
+# apolloDJ PRO — runtime dependencies
+# Priority C: keep base install lightweight. Heavy analysis libs are optional
+# and only imported lazily inside the Top-3-Podium fallback chains.
+
+# --- Core (always installed) --------------------------------------------
+packaging>=24.1
+requests>=2.32.0
+keyring>=25.2.0
+mutagen>=1.47.0
+pywebview>=5.1
+pyinstaller>=6.9.0
+apscheduler>=3.10            # 5-hour silent token + membership auto-refresh
+
+# --- Audio I/O (light, always installed) --------------------------------
+soundfile>=0.12.1
+pydub>=0.25.1
+
+# --- Optional: precision tier (install only on "Ultra Accuracy" build) --
+# pip install -r requirements-extra.txt
+#   madmom>=0.16.1
+#   librosa>=0.10.2
+#   numpy>=1.26
+#   scipy>=1.13
+#   pyloudnorm>=0.1.1
+#   ffmpeg-normalize>=1.28.0
+#   pyrekordbox>=0.4.0
+#   musicbrainzngs>=0.7.1
+#   python-vlc>=3.0.20123
+#   Pillow>=10.3.0

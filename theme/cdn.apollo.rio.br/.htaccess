@@ -1,0 +1,85 @@
+# Httacces on: cdn.apollo.rio.br/.htaccess and assets.apollo.rio.br/.htaccess
+Options -Indexes
+FileETag MTime Size
+AddDefaultCharset UTF-8
+
+## MANDATORY: never remove these ErrorDocument mappings (all subdomains)
+ErrorDocument 400 https://apollo.rio.br/erro/400/
+ErrorDocument 403 https://apollo.rio.br/erro/403/
+ErrorDocument 404 https://apollo.rio.br/erro/404/
+ErrorDocument 500 https://apollo.rio.br/erro/500/
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # HTTPS force (CDN-safe + no loop)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [OR]
+    RewriteCond %{HTTP:CF-Visitor} '"scheme":"http"'
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    
+    # OPTIONS preflight — fixed (no 500)
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^ - [L]
+    
+    # Safe hotlink (Allows local dev + apollo/codepen test domains)
+    RewriteCond %{HTTP_REFERER} !^$
+    RewriteCond %{HTTP_REFERER} !^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?/ [NC]
+    RewriteCond %{HTTP_REFERER} !^https?://([a-z0-9-]+\.)?(apollo\.rio\.br|codepen\.io|cdpn\.io) [NC]
+    RewriteRule \.(png|jpg|jpeg|gif|webp|svg)$ - [F,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    # CORS public CDN (stable)
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, HEAD, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Range"
+    Header always append Vary Origin
+    
+    # Security
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+    
+    # CDN MUST BE CROSS-ORIGIN
+    Header always set Cross-Origin-Resource-Policy "cross-origin"
+    Header always append Vary Accept-Encoding
+    
+    # Safely apply HTML headers ONLY to HTML/PHP documents
+    <FilesMatch "\.(html|htm|php)$">
+        Header always set Content-Type "text/html; charset=UTF-8"
+        Header set Content-Language "pt-BR"
+    </FilesMatch>
+</IfModule>
+
+# Native, efficient MIME & Charset mapping
+<IfModule mod_mime.c>
+    AddCharset UTF-8 .html .htm .php .js .css .json .xml .txt
+    AddType application/javascript;charset=UTF-8 .js
+    AddType text/css;charset=UTF-8 .css
+    AddType application/json;charset=UTF-8 .json
+</IfModule>
+
+# Immutable cache (includes JSON)
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|webp|svg|woff2?|woff|ttf|map|wasm|ico|json)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/* "access plus 1 year"
+    ExpiresByType font/* "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/json "access plus 30 minutes"
+</IfModule>
+
+# Deflate only (Brotli removed)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/css application/javascript text/javascript application/json image/svg+xml
+</IfModule>
+
+# Force PHP to process in UTF-8
+<IfModule mod_php.c>
+    php_value default_charset UTF-8
+</IfModule>

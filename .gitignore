@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.spec.bak
+.env
+.venv/
+venv/
+_recovery_snapshot_*/
